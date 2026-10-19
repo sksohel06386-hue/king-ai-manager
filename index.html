@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101014"><meta name="description" content="Local colour result statistics tool">
+<title>Colour Signal Analyzer</title><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg">
+<style>
+:root{color-scheme:dark;--bg:#101014;--panel:#1a1a22;--gold:#f5c451;--muted:#aaaab6;--line:#30303a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#f6f6f8;font:16px system-ui,sans-serif}main{max-width:760px;margin:auto;padding:18px}
+header{padding:18px 0 10px}.eyebrow{color:var(--gold);font-weight:800;letter-spacing:.12em;font-size:.75rem}h1{font-size:1.8rem;margin:.35rem 0}h2{font-size:1.15rem;margin:0 0 12px}p{color:var(--muted);line-height:1.5}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin:14px 0}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.stat{padding:13px 5px;text-align:center;border-radius:12px;background:#24242d}.stat strong{display:block;font-size:1.4rem;margin:5px 0}
+.red{color:#ff7078}.green{color:#55e3a2}.violet{color:#c39aff}label{display:block;font-size:.9rem;margin:10px 0 6px;color:#ddd}
+select,textarea{width:100%;padding:12px;border:1px solid #454552;border-radius:10px;background:#111116;color:#fff;font:inherit}textarea{min-height:90px;resize:vertical}
+.buttons{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}button{border:0;border-radius:10px;padding:12px 14px;background:var(--gold);color:#161616;font-weight:800;font-size:.92rem}button.secondary{background:#343440;color:white}button.danger{background:#5a252a;color:white}
+.small{font-size:.83rem}.barrow{display:grid;grid-template-columns:65px 1fr 44px;align-items:center;gap:8px;margin:10px 0}.track{height:10px;background:#33333e;border-radius:10px;overflow:hidden}.fill{height:100%;border-radius:10px}.fill.red{background:#ff7078}.fill.green{background:#55e3a2}.fill.violet{background:#c39aff}
+ul{padding-left:20px;color:var(--muted);line-height:1.6}.warning,.notice{padding:10px 12px;background:#27251e;border-radius:10px;color:#f4dda0;font-size:.85rem;line-height:1.45}.warning{border-left:3px solid var(--gold);padding-left:12px}.history{display:flex;flex-wrap:wrap;gap:7px}.chip{border:1px solid var(--line);padding:7px 10px;border-radius:999px;font-size:.82rem}.chip.red{background:#482329}.chip.green{background:#173e31}.chip.violet{background:#352449}.muted{color:var(--muted)}footer{font-size:.8rem;color:var(--muted);padding:10px 0 28px}
+</style></head><body><main>
+<header><div class="eyebrow">PRACTICE • STATISTICS • NO GUARANTEES</div><h1>Colour Signal Analyzer</h1><p>Record Red, Green and Violet results, review sample statistics, and see a cautious frequency summary. No betting or platform connection.</p></header>
+<section class="panel"><h2>Dashboard</h2><div class="grid">
+<div class="stat"><span class="red">● Red</span><strong id="redCount">0</strong><span class="small" id="redPct">0%</span></div>
+<div class="stat"><span class="green">● Green</span><strong id="greenCount">0</strong><span class="small" id="greenPct">0%</span></div>
+<div class="stat"><span class="violet">● Violet</span><strong id="violetCount">0</strong><span class="small" id="violetPct">0%</span></div></div><p id="totalText">0 results recorded</p><div id="bars"></div></section>
+<section class="panel"><h2>Add a result</h2><label for="colour">Choose result colour</label><select id="colour"><option>Red</option><option>Green</option><option>Violet</option></select>
+<div class="buttons"><button id="add">＋ Add result</button><button class="secondary" id="undo">Undo last</button></div>
+<label for="bulk">Import multiple results</label><textarea id="bulk" placeholder="Red, Green, Green, Violet, Red"></textarea><p class="small">Separate colours with commas, spaces, semicolons or new lines. Accepted: Red, Green, Violet.</p>
+<div class="buttons"><button id="import">Import results</button><button class="secondary" id="export">Export CSV</button><button class="danger" id="clear">Clear history</button></div><p class="small">Saved in this browser on this device. Export a CSV backup before clearing browser data.</p></section>
+<section class="panel"><h2>Sample signal analysis</h2><div id="signal"><b>Insufficient data</b></div><p id="signalText">Record at least 20 results to see a historical frequency summary. This is not a prediction.</p><div id="streak" class="small"></div><div class="notice">The most frequent result only describes your saved sample. It does not mean that colour is more likely to appear next.</div></section>
+<section class="panel"><h2>Recent history</h2><div id="history" class="history"><span class="small muted">No results yet.</span></div><p id="historyFoot" class="small"></p></section>
+<section class="panel"><h2>Beginner guide</h2><ul><li>Choose Red, Green or Violet and tap Add result.</li><li>Paste colour names to import a batch.</li><li>Review counts and percentages to understand saved history.</li><li>Export CSV to keep a copy of your results.</li><li>Never treat the analyzer as a guaranteed signal or chase losses.</li></ul><p class="warning">If outcomes are random and independent, past colours do not reveal the next outcome. No account access, deposits, payments, or automatic betting are included.</p></section>
+<footer>Colour Signal Analyzer v2 • Android-friendly PWA starter</footer></main>
+<script>
+const KEY='colourSignalAnalyzer.v2', COLOURS=['Red','Green','Violet'];let results=[];const $=id=>document.getElementById(id);
+function load(){try{let x=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(x))results=x.filter(v=>COLOURS.includes(v))}catch(e){}render()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(results))}catch(e){alert('Browser storage unavailable. Export your results as a backup.')}}
+function pct(n,t){return t?Math.round(n/t*100):0}
+function render(){let total=results.length,counts={Red:0,Green:0,Violet:0};results.forEach(v=>counts[v]++);
+COLOURS.forEach(c=>{$(c.toLowerCase()+'Count').textContent=counts[c];$(c.toLowerCase()+'Pct').textContent=pct(counts[c],total)+'%'});
+$('totalText').textContent=total+' result'+(total===1?'':'s')+' recorded';
+$('bars').innerHTML=COLOURS.map(c=>'<div class="barrow"><span class="'+c.toLowerCase()+'">'+c+'</span><div class="track"><div class="fill '+c.toLowerCase()+'" style="width:'+pct(counts[c],total)+'%"></div></div><span>'+pct(counts[c],total)+'%</span></div>').join('');
+$('history').innerHTML=results.length?results.slice().reverse().slice(0,60).map((c,i)=>'<span class="chip '+c.toLowerCase()+'">'+(results.length-i)+'. '+c+'</span>').join(''):'<span class="small muted">No results yet.</span>';
+$('historyFoot').textContent=total>60?'Showing latest 60 of '+total+' results.':'';
+if(total<20){$('signal').textContent='Insufficient data';$('signalText').textContent='Add '+(20-total)+' more result(s) to display a sample frequency summary. More data still does not guarantee prediction.'}
+else{let max=Math.max(...Object.values(counts)),leaders=COLOURS.filter(c=>counts[c]===max);$('signal').textContent=leaders.length===1?'Most frequent in sample: '+leaders[0]:'Sample leaders tied: '+leaders.join(', ');$('signalText').textContent='Across '+total+' saved results: '+COLOURS.map(c=>c+' '+counts[c]+' ('+pct(counts[c],total)+'%)').join(' • ')+'. This summarizes past data only.'}
+let streak=0,last=results[results.length-1];for(let i=results.length-1;i>=0&&results[i]===last;i--)streak++;$('streak').textContent=total?'Latest saved result: '+last+' • Current streak: '+streak:''}
+$('add').onclick=()=>{results.push($('colour').value);save();render()};
+$('undo').onclick=()=>{if(results.length){results.pop();save();render()}};
+$('import').onclick=()=>{let raw=$('bulk').value.trim();if(!raw){alert('Paste some results first.');return}let tokens=raw.split(/[;,|\s]+/).filter(Boolean),map={red:'Red',r:'Red',green:'Green',g:'Green',violet:'Violet',purple:'Violet',v:'Violet'},valid=[],bad=[];tokens.forEach(t=>map[t.toLowerCase()]?valid.push(map[t.toLowerCase()]):bad.push(t));if(!valid.length){alert('No valid colours found. Use Red, Green or Violet.');return}results.push(...valid);$('bulk').value='';save();render();alert('Imported '+valid.length+' result(s).'+(bad.length?' Skipped '+bad.length+' unrecognized item(s).':''))};
+$('clear').onclick=()=>{if(confirm('Delete all results saved by this app in this browser?')){results=[];save();render()}};
+$('export').onclick=()=>{let csv='index,colour\n'+results.map((v,i)=>(i+1)+','+v).join('\n'),blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='colour-results.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+if('serviceWorker'in navigator&&location.protocol.startsWith('http'))addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));load();
+</script></body></html>
