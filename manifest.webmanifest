@@ -1,11 +1,16 @@
 {
-  "name": "Colour Signal Analyzer",
-  "short_name": "Colour Analyzer",
-  "description": "Local colour result statistics and practice analyzer",
-  "start_url": "./index.html",
-  "scope": "./",
+  "name": "KING AI Dropshipping Manager",
+  "short_name": "KING AI",
+  "start_url": "./",
   "display": "standalone",
-  "background_color": "#101014",
-  "theme_color": "#101014",
-  "icons": [{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"}]
+  "background_color": "#09090b",
+  "theme_color": "#0b0b0d",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
 }
